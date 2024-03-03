@@ -1,5 +1,6 @@
 <?php
 
+include 'headers.php';
 include 'database.php';
 include 'utils.php';
 
