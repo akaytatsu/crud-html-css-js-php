@@ -36,19 +36,46 @@ function fetchList() {
         });
 }
 
-function TodoItem({ todo }) {
+function TodoItem({ todo, fetchList }) {
+    const deleteTodo = async () => {
+        const formData = new FormData();
+        formData.append('id', todo.id);
+
+        await fetch('http://localhost:8000/deleta.php', {
+            method: 'POST',
+            body: formData,
+        });
+
+        await fetchList();
+    };
+
+    const doneTodo = async () => {
+        const formData = new FormData();
+        formData.append('id', todo.id);
+        formData.append('done', todo.done ? 0 : 1);
+
+        await fetch('http://localhost:8000/feito.php', {
+            method: 'POST',
+            body: formData,
+        });
+
+        fetchList();
+    };
+
     return (
         <div className="flex mb-4 items-center">
-            <p className="w-full line-through text-green">
-                {todo}
+            <p className={todo.done == 1 ? "w-full line-through text-green" : "w-full text-green"}>
+                {todo.title}
             </p>
             <button
-                className="flex-no-shrink p-2 ml-4 mr-2 border-2 rounded hover:text-white text-grey border-grey hover:bg-grey"
+                className="flex-no-shrink p-2 ml-4 mr-2 border-2 rounded text-grey border-grey hover:bg-grey"
+                onClick={() => doneTodo(todo.id, todo.done)}
             >
-                Não Feito
+                {todo.done == 1 ? 'Não Feito' : 'Feito'}
             </button>
             <button
-                className="flex-no-shrink p-2 ml-2 border-2 rounded text-red border-red hover:text-white hover:bg-red"
+                className="flex-no-shrink p-2 ml-2 border-2 rounded border-red hover:text-white hover:bg-red"
+                onClick={() => deleteTodo(todo.id)}
             >
                 Remover
             </button>
@@ -58,11 +85,8 @@ function TodoItem({ todo }) {
 
 function TodoList() {
 
-    // React.useEffect(() => {
-    //     fetchList();
-    // }, []);
-
     const [todos, setTodos] = React.useState([]);
+    const [newTodo, setNewTodo] = React.useState('');
 
     const fetchList = () => {
         fetch('http://localhost:8000/lista.php')
@@ -80,10 +104,24 @@ function TodoList() {
             });
     };
 
+    const addTodo = async () => {
+        setTodos([...todos, newTodo]);
+        const fetchCreate = async () => {
+            const formData = new FormData();
+            formData.append('title', newTodo);
+
+            await fetch('http://localhost:8000/cria.php', {
+                method: 'POST',
+                body: formData,
+            }).then((data) => {
+                fetchList();
+            });
+        }
+    };
+
     React.useEffect(() => {
         fetchList();
     }, []);
-
 
     return (
         <div
@@ -96,9 +134,12 @@ function TodoList() {
                         <input
                             className="shadow appearance-none border rounded w-full py-2 px-3 mr-4 text-grey-darker"
                             placeholder="Adicionar Todo"
+                            value={newTodo}
+                            onChange={e => setNewTodo(e.target.value)}
                         />
                         <button
                             className="flex-no-shrink p-2 border-2 rounded text-teal border-teal hover:text-white hover:bg-teal"
+                            onClick={addTodo}
                         >
                             Adicionar
                         </button>
@@ -106,7 +147,7 @@ function TodoList() {
                 </div>
                 <div>
                     {todos.map((todo, index) => (
-                        <TodoItem key={index} todo={todo} />
+                        <TodoItem key={index} todo={todo} fetchList={fetchList} />
                     ))}
                 </div>
             </div>
