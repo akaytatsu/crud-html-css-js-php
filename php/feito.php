@@ -1,7 +1,5 @@
 <?php
 
-use function PHPSTORM_META\type;
-
 include 'headers.php';
 include 'database.php';
 include 'utils.php';
