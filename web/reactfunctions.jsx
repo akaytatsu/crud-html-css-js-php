@@ -105,18 +105,16 @@ function TodoList() {
     };
 
     const addTodo = async () => {
-        setTodos([...todos, newTodo]);
-        const fetchCreate = async () => {
-            const formData = new FormData();
-            formData.append('title', newTodo);
+        const formData = new FormData();
+        formData.append('title', newTodo);
 
-            await fetch('http://localhost:8000/cria.php', {
-                method: 'POST',
-                body: formData,
-            }).then((data) => {
-                fetchList();
-            });
-        }
+        await fetch('http://localhost:8000/cria.php', {
+            method: 'POST',
+            body: formData,
+        }).then((data) => {
+            setNewTodo('');
+            fetchList();
+        });
     };
 
     React.useEffect(() => {
